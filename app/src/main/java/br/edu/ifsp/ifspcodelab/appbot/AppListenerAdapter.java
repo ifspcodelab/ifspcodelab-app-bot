@@ -1,5 +1,11 @@
 package br.edu.ifsp.ifspcodelab.appbot;
 
+import br.edu.ifsp.ifspcodelab.appbot.model.CreateMonthlyReport;
+import br.edu.ifsp.ifspcodelab.appbot.model.ParticipationType;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import lombok.extern.java.Log;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -8,7 +14,9 @@ import org.jetbrains.annotations.NotNull;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Log
 public class AppListenerAdapter extends ListenerAdapter {
@@ -41,36 +49,35 @@ public class AppListenerAdapter extends ListenerAdapter {
                 return;
             }
 
-            var data = messageTokens[1];
+            var dataString = messageTokens[1];
             var name = messageTokens[2];
             var planActivities = messageTokens[3];
             var executedActivities = messageTokens[4];
             var results = messageTokens[5];
 
+            LocalDate data;
             try {
-                LocalDate.parse(data, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                data = LocalDate.parse(dataString, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             } catch (DateTimeParseException exception) {
                 event.getMessage().reply("Data formato inválido. Enviar no formato dd/mm/aaaa, ex: 05/11/2021").queue();
                 return;
             }
 
-            if(name.length() < 5 || name.length() > 100) {
-                event.getMessage().reply("Nome deve ter no mínimo 5 e no máximo 100 caracteres").queue();
-                return;
-            }
+            CreateMonthlyReport createMonthlyReport = new CreateMonthlyReport(
+                ParticipationType.VOLUNTEER, data, name, planActivities, executedActivities, results
+            );
 
-            if(planActivities.length() < 100 || planActivities.length() > 600) {
-                event.getMessage().reply("Atividades Planejadas deve ter no mínimo 100 e no máximo 600 caracteres").queue();
-                return;
-            }
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
 
-            if(executedActivities.length() < 100 || planActivities.length() > 600) {
-                event.getMessage().reply("Atividades Realizadas deve ter no mínimo 100 e no máximo 600 caracteres").queue();
-                return;
-            }
+            Set<ConstraintViolation<CreateMonthlyReport>> violations = validator.validate(createMonthlyReport);
 
-            if(results.length() < 100 || planActivities.length() > 600) {
-                event.getMessage().reply("Resultados obtidos deve ter no mínimo 100 e no máximo 600 caracteres").queue();
+            if(!violations.isEmpty()) {
+                String errorMessage = "Seu pedido contem os seguinte erros: \n";
+                errorMessage = errorMessage + violations.stream()
+                    .map(ConstraintViolation::getMessage)
+                    .collect(Collectors.joining("\n"));
+                event.getMessage().reply(errorMessage).queue();
                 return;
             }
 
