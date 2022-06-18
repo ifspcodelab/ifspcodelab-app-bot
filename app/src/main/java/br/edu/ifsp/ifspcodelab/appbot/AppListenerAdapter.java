@@ -1,36 +1,33 @@
 package br.edu.ifsp.ifspcodelab.appbot;
 
-import br.edu.ifsp.ifspcodelab.appbot.model.CreateMonthlyReport;
-import br.edu.ifsp.ifspcodelab.appbot.model.ParticipationType;
+import br.edu.ifsp.ifspcodelab.appbot.models.CreateMonthlyReport;
+import br.edu.ifsp.ifspcodelab.appbot.models.ParticipationType;
+import br.edu.ifsp.ifspcodelab.appbot.services.MonthlyReportService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Log
+@AllArgsConstructor
 public class AppListenerAdapter extends ListenerAdapter {
     private static final String SPLIT_REGEX = "\n";
-    private static final String REPORT_FORMAT_ERROR = """
-    Formato inválido. Enviar neste formato:
-    ```
-    relatorio-mensal-voluntario
-    01/03/2022
-    Nome completo do aluno
-    Atividade planejada 1; Atividade planejada 2; Atividade planejada 3.
-    Atividade realizada 1; Atividade realizada 2; Atividade realizada 3.
-    Resultado obtido 1; Resultado 2;
-    ```""";
+    private static final String REPORT_FORMAT_ERROR = "dsadsadas";
+
+    private MonthlyReportService monthlyReportService;
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -81,7 +78,18 @@ public class AppListenerAdapter extends ListenerAdapter {
                 return;
             }
 
-            event.getMessage().reply("relatorio").queue();
+            ByteArrayOutputStream reportBaos = monthlyReportService.generateReport(createMonthlyReport);
+
+            if(reportBaos == null) {
+                event.getMessage().reply("Erro ao criar o relatória").queue();
+                return;
+            }
+
+            var fileName = UUID.randomUUID().toString() + ".pdf";
+            event.getMessage()
+                .reply("Aqui está seu relatório")
+                .addFile(reportBaos.toByteArray(), fileName)
+                .queue();
         }
     }
 }
