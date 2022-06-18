@@ -1,4 +1,4 @@
-package br.edu.ifsp.ifspcodelab.appbot.model;
+package br.edu.ifsp.ifspcodelab.appbot.models;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
