@@ -25,7 +25,15 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class AppListenerAdapter extends ListenerAdapter {
     private static final String SPLIT_REGEX = "\n";
-    private static final String REPORT_FORMAT_ERROR = "dsadsadas";
+    private static final String REPORT_FORMAT_ERROR = """
+Formato inválido. Enviar neste formato:
+```
+relatorio-mensal-voluntario
+01/03/2022
+Nome completo do membro
+Atividade planejada 1; Atividade planejada 2; Atividade planejada 3; Atividade planejada 4; Atividade planejada 5.
+Atividade realizada 1; Atividade realizada 2; Atividade realizada 3; Atividade realizada 4; Atividade realizada 5.
+Resultado obtido 1; Resultado obtido 2; Resultado obtido 3; Resultado obtido 4; Resultado obtido 5; Resultado obtido 6;```""";
 
     private MonthlyReportService monthlyReportService;
 
