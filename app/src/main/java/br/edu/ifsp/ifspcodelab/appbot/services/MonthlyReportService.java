@@ -117,7 +117,7 @@ public class MonthlyReportService {
             signaturesTable.getDefaultCell().setBorderColor(new Color(255, 255, 255));
             signaturesTable.addCell(generateCellCenter("________________________________", 1, fontTimesBold));
             signaturesTable.addCell(generateCellCenter("________________________________", 1, fontTimesBold));
-            signaturesTable.addCell(generateCellCenter("Bolsista de Ensino", 1, fontDefault));
+            signaturesTable.addCell(generateCellCenter("Voluntário", 1, fontDefault));
             signaturesTable.addCell(generateCellCenter("Professor Responsável", 1, fontDefault));
             document.add(signaturesTable);
             document.close();
